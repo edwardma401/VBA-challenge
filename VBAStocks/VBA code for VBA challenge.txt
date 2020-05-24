@@ -1,0 +1,82 @@
+
+Public Sub ticker()
+
+Dim sh As Worksheet
+Set sh = ThisWorkbook.ActiveSheet
+
+Dim k As Long
+
+k = sh.Range("A1", sh.Range("A1").End(xlDown)).Rows.Count
+If k = 1048576 Then
+    k = 1
+End If
+
+
+Range("I1").Value = "Ticker"
+Dim ticketrow As Integer
+ticketrow = 2
+Dim tickertype As String
+
+Range("J1").Value = "Yearly Change"
+Cells(1, 10).EntireColumn.AutoFit
+Dim jrow As Integer
+jrow = 2
+Dim yearlychanges As Double
+yearlychanges = 0
+
+Range("K1").Value = "Percent Change"
+Cells(1, 11).EntireColumn.AutoFit
+Dim percentchanges As Double
+percentchanges = 0
+Dim krow As Integer
+krow = 2
+
+Range("L1").Value = "Total Stock Volume"
+Cells(1, 12).EntireColumn.AutoFit
+Dim totalstocks As Double
+totalstocks = 0
+Dim lrow As Integer
+lrow = 2
+
+For i = 2 To k
+    If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+        tickertype = Cells(i, 1).Value
+        Range("I" & ticketrow).Value = tickertype
+        ticketrow = ticketrow + 1
+        
+        Range("J" & jrow).Value = yearlychanges
+        If yearlychanges < 0 Then
+            Range("J" & jrow).Interior.Color = vbRed
+        Else
+            Range("J" & jrow).Interior.Color = vbGreen
+        End If
+        jrow = jrow + 1
+        
+        If yearlychanges = 0 Or originalvalue = 0 Then   ' added if function in case yearlychanges = 0 and originalvalue = 0 (like the case of ticker DS in sheet D of alphabetical testing).
+            percentchanges = 0                             ' if yearlychanges and original value are = 0, then should the percent change be 0 as well?
+        Else
+            percentchanges = yearlychanges / originalvalue ''''need a check here, if the formula is correct.
+        End If
+        Range("k" & krow).Value = percentchanges       'I'm not sure if original value is suppose to be
+        Range("K" & krow).NumberFormat = "0.00%"        ' the value of first open value (such as cells(1, 3).
+        krow = krow + 1                                   'Also, has an overflow issue on alphabetical testing sheet p, with percentage.
+        
+        Range("L" & lrow).Value = totalstocks
+        lrow = lrow + 1
+        
+        totalstocks = 0
+        percentchanges = 0
+        yearlychanges = 0
+        originalvalue = 0
+    ElseIf Cells(i, 3).Value = Cells(i, 6) Then 'need a check here.
+        originalvalue = Cells(i, 3).Value       'On the alphabetical testing, D sheet, DS was Cells(i,3).Value <> Cells(i, 6).
+    Else                                         'what do I do now?
+        yearlychanges = yearlychanges + Cells(i, 3).Value - Cells(i, 6).Value
+        totalstocks = totalstocks + Cells(i, 7).Value
+    
+        If i = k Then Exit For
+
+    End If
+Next i
+
+End Sub
